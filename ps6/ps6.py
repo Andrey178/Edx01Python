@@ -165,9 +165,8 @@ class PlaintextMessage(Message):
         code is repeated
         '''
         # pass #delete this line and replace with your code here
-        Message.__init__(text)
         self.message_text = text
-        self.valid_words = self.get_valid_words()
+        self.valid_words = load_words(WORDLIST_FILENAME)
         self.shift = shift
         self.encrypting_dict = self.build_shift_dict(shift)
         self.message_text_encrypted = self.apply_shift(shift)
@@ -224,7 +223,9 @@ class CiphertextMessage(Message):
             self.message_text (string, determined by input text)
             self.valid_words (list, determined using helper function load_words)
         '''
-        pass #delete this line and replace with your code here
+        # pass #delete this line and replace with your code here
+        self.message_text = text
+        self.valid_words = load_words(WORDLIST_FILENAME)
 
     def decrypt_message(self):
         '''
@@ -242,7 +243,39 @@ class CiphertextMessage(Message):
         Returns: a tuple of the best shift value used to decrypt the message
         and the decrypted message text using that shift value
         '''
-        pass #delete this line and replace with your code here
+        # pass #delete this line and replace with your code here
+        cipher_level = 0
+        cipher_effect = []
+        cipher_effect_level = []
+        decoded_strings = []
+        for i in range(26):
+            cipher = self.build_shift_dict(i)
+            decrypted_text = []
+            for symb in self.message_text:
+                # print(symb, end=' ')
+                found_symbol = False
+                for k, v in cipher.items():
+                    if k == symb:
+                        decrypted_text.append(v)
+                        found_symbol = True
+                        break
+                if not found_symbol:
+                    decrypted_text.append(symb)
+            # print(" " + str(i) + " " + ''.join(decrypted_text))
+            decrypted_text = ''.join(decrypted_text)
+            decoded_strings.append(decrypted_text)
+            decrypted_text = decrypted_text.split()
+            cipher_effect_number = 0
+            for word in decrypted_text:
+                if is_word(self.valid_words, word):
+                    cipher_effect_number += 1
+            cipher_effect.append(i)
+            cipher_effect_level.append(cipher_effect_number)
+
+        max_cipher_effect_level = cipher_effect_level.index(max(cipher_effect_level))
+        max_cipher_effect = cipher_effect[max_cipher_effect_level]
+        # print(max_cipher_effect, max_cipher_effect_level, decoded_strings)
+        return max_cipher_effect, decoded_strings[max_cipher_effect]
 
 #Example test case (PlaintextMessage)
 plaintext = PlaintextMessage('hello', 2)
